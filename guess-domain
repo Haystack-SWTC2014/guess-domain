@@ -1,0 +1,27 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use 5.18.2;
+
+my @words = @ARGV;
+
+my @models = (
+    'snakes',
+    'python'
+);
+
+my @perplexity;
+foreach my $model (@models) {
+    open my $tmpfile, '>', 'search-terms';
+    print $tmpfile join ' ', @words;
+    my $output = `ngram -lm $model -ppl search-terms`;
+    my $result = /ppl= (\d+\.\d+)/;
+    my $ppl = $1;
+    push @perplexity, [$model, $ppl];
+}
+
+# sort based on perplexity
+@perplexity = sort { $a->[1] <=> $b->[1] } @perplexity;
+
+print STDOUT join @perplexity ' ', @perplexity;
+exit 0;
